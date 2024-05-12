@@ -50,7 +50,7 @@
                                 <th>To</th>
                                 <th>Amount</th>
                                 <th>Signature</th>
-                                <th>Mining</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -65,7 +65,7 @@
                                         <form action="{{ route('pending.mine') }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="transactionId" value="{{ $transaction['id'] }}">
-                                            <button type="submit" class="btn btn-primary">Mine Transaction</button>
+                                            <button type="submit" class="btn btn-primary">Mine</button>
                                         </form>
                                     </td>
                                 </tr>
