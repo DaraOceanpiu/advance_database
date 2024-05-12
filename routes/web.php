@@ -13,6 +13,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 Route::get('/', function () {
-    return view('welcome');
+    return view('home.index');
+});
+Route::get('/wallets', function () {
+    return view('wallets.index');
+});
+Route::get('/pending', function () {
+    return view('pending.index');
 });
