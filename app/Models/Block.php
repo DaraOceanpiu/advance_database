@@ -14,28 +14,33 @@ class Block
     public $nonce;
 
     public function __construct($transactions, $previousHash = '')
-    {
-        $this->timestamp = now()->toDateTimeString();
-        $this->transactions = $transactions;
-        $this->previousHash = $previousHash;
-        $this->nonce = 0;
-        $this->hash = $this->calculateHash();
-    }
+{
+    $this->timestamp = now()->toDateTimeString();
+    $this->transactions = $transactions;
+    $this->previousHash = $previousHash;
+    $this->nonce = mt_rand();  // Initialize nonce to a random number
+    $this->hash = $this->calculateHash();
+}
+
 
     public function calculateHash() {
         return hash('sha256', $this->previousHash . $this->timestamp . json_encode($this->transactions) . $this->nonce);
     }
 
-    public function mineBlock($difficulty) {
-        $target = str_repeat("0", $difficulty);
+    public function mineBlock($difficulty)
+    {
+        $target = str_repeat("0", $difficulty); // Create a string with difficulty number of "0"
+        if (substr($this->hash, 0, $difficulty) !== $target) {
+            $this->nonce = 0;  // Reset nonce if the current hash does not meet the target
+            $this->hash = $this->calculateHash();
+        }
+    
         while (substr($this->hash, 0, $difficulty) !== $target) {
             $this->nonce++;
             $this->hash = $this->calculateHash();
-            Log::info("Trying nonce {$this->nonce}: Hash {$this->hash}");
         }
-        Log::info("Block mined with nonce {$this->nonce}, hash: {$this->hash}");
     }
-
+    
     
 
     public function serialize() {
