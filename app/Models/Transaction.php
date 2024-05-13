@@ -2,20 +2,12 @@
 
 namespace App\Models;
 
-class Transaction
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Transaction extends Model
 {
-    public $fromAddress;
-    public $toAddress;
-    public $amount;
-    public $signature;
+    use HasFactory;
 
-    public function __construct($fromAddress, $toAddress, $amount, $signature = null) {
-        $this->fromAddress = $fromAddress;
-        $this->toAddress = $toAddress;
-        $this->amount = $amount;
-        $this->signature = $signature;
-    }
-
-    // Add any necessary transaction methods here, like signing or verification
+    protected $fillable = ['from', 'to', 'amount', 'signature'];
 }
-

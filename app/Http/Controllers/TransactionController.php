@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use App\Models\Transaction;
 
 class TransactionController extends Controller
 {
     public function index()
     {
-        $pendingTransactions = Session::get('pendingTransactions', []);
+        $pendingTransactions = Transaction::all();
         return view('pending.index', compact('pendingTransactions'));
     }
 
@@ -23,71 +24,45 @@ class TransactionController extends Controller
         $transactionData = $fromAddress . $toAddress . $amount;
         $signature = $this->signTransaction($transactionData);
 
-        $transaction = [
-            'id' => uniqid(),
-            'timestamp' => now(),
+        $transaction = Transaction::create([
             'from' => $fromAddress,
             'to' => $toAddress,
             'amount' => $amount,
             'signature' => $signature
-        ];
-
-        $pendingTransactions = Session::get('pendingTransactions', []);
-        $pendingTransactions[] = $transaction;
-        Session::put('pendingTransactions', $pendingTransactions);
+        ]);
 
         return redirect()->route('pending.index')->with('message', 'Transaction created successfully!');
     }
 
+    private function signTransaction($transactionData)
+    {
+        // Hash the transaction data to create a signature
+        return Hash::make($transactionData);
+    }
     public function mine(Request $request)
     {
-        Log::info("Mining transaction");
-
+        // Assume you have a Transaction model
         $transactionId = $request->input('transactionId');
-        $transactions = Session::get('pendingTransactions', []);
-        $transaction = collect($transactions)->firstWhere('id', $transactionId);
+        $transaction = Transaction::find($transactionId);
 
         if (!$transaction) {
-            Log::error("No transaction found with ID", ['transactionId' => $transactionId]);
-            return back()->with('error', 'Transaction not found.');
+            return response()->json(['message' => 'Transaction not found'], 404);
         }
 
-        Log::info("Transaction found", ['id' => $transaction['id']]);
+        // Your logic for "mining" the transaction
+        // For example, updating the transaction status
+        $transaction->status = 'mined';
+        $transaction->save();
 
-        // Simulate hash and nonce for the transaction
-        $transaction['hash'] = hash('sha256', serialize($transaction));
-        $transaction['nonce'] = mt_rand();
+        // Fetch all transactions with the current timestamp
+        $transactions = Transaction::all();
+        $timestamp = now(); // Get the current timestamp
 
-        // Update session or database as necessary
-        $completedBlocks = Session::get('completedBlocks', []);
-        $completedBlocks[] = $transaction;
-        Session::put('completedBlocks', $completedBlocks);
-
-        // Log the session data to debug
-        Log::debug('Session Data:', Session::all());
-
-        // Remove transaction from pending transactions
-        $transactions = array_filter($transactions, function ($t) use ($transactionId) {
-            return $t['id'] !== $transactionId;
-        });
-        Session::put('pendingTransactions', $transactions);
-
-        // Reflash and redirect with a flash message indicating the block was added
-        Session::reflash();
-        return redirect()->route('home')->with('success', 'Transaction mined successfully!')->with('status', 'block_added');
+        // Redirect back to the homepage with transactions data and timestamp
+        return redirect()->route('home.index')->with('message', 'Transaction mined successfully');
     }
-
-    private function signTransaction($data)
+    public function minedTransactions()
     {
-        $privateKey = '89ab45a1615c6a2c5382153d07b42dcb5c74b50ed39fb6f6421406d61bd50a4';
-        return hash('sha256', $privateKey . $data);
-    }
-
-    private function verifySignature($transaction)
-    {
-        $publicKey = 'df952bd220cecb037be12d59e7d86532b8b0b9166e1cb69bd4cb094dee2bb2c9';
-        $data = $transaction['from'] . $transaction['to'] . $transaction['amount'];
-        $computedSignature = hash('sha256', $publicKey . $data);
-        return $transaction['signature'] === $computedSignature;
+        return $this->hasMany(Transaction::class, 'parent_transaction_id');
     }
 }

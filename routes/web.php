@@ -47,3 +47,6 @@ Route::get('/', [BlockController::class, 'index'])->name('home');
 Route::post('/block/add', [BlockController::class, 'addBlock'])->name('block.add');
 Route::get('/blockchain/verify', [BlockController::class, 'verifyBlockchain'])->name('blockchain.verify');
 Route::get('/verifyBlockchain', [BlockController::class, 'verifyBlockchain'])->name('verifyBlockchain');
+
+Route::post('/transaction/create', [TransactionController::class, 'create'])->name('pending.create');
+Route::get('/transaction/mine', [TransactionController::class, 'index'])->name('home.index');
