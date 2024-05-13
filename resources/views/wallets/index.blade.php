@@ -93,21 +93,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-12">
-                    <h2 class="text-dark">Completed Blocks</h2>
-                    @if (session('completedBlocks'))
-                        <div class="card mb-4">
-                            <div class="card-body bg-gray-100">
-                                <ul>
-                                    @foreach (session('completedBlocks') as $block)
-                                        <li>{{ $block['timestamp'] }} from {{ $block['from'] }} to {{ $block['to'] }} -
-                                            Amount: {{ $block['amount'] }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    @endif
-                </div>
+                
             </div>
         </div>
     @stop

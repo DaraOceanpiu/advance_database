@@ -1,4 +1,5 @@
 @extends('master.master')
+
 @section('content')
 <!DOCTYPE html>
 <html lang="en">
@@ -6,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>BlockChain</title>
+    <title>Blockchain</title>
 </head>
 <body>
     <div class="container-fluid">
@@ -14,7 +15,7 @@
             <h2 class="text-dark">Home</h2>
             <div class="col-lg-12">
                 <div class="card mb-4">
-                    <div class="card-body bg-gray-100" >
+                    <div class="card-body bg-gray-100">
                         <div class="row mb-2">
                             <div class="col-md-9">
                                 <button type="button" class="btn btn-dark">Verify Blockchain</button>
@@ -26,29 +27,34 @@
                                 <h5 class="text-md">Blocks</h5>
                             </div>
                         </div>
-                        
                         <hr>
                         <div class="row">
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead class="table-light">
                                         <tr>
-                                            <th >Timestamp</th>
-                                            <th >Hash</th>
-                                            <th >Nounce</th>
+                                            <th>Timestamp</th>
+                                            <th>Hash</th>
+                                            <th>Nonce</th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        @if(session('minedTransaction'))
+                                            <tr>
+                                                <td>{{ session('minedTransaction')['timestamp'] }}</td>
+                                                <td>{{ session('minedTransaction')['hash'] }}</td>
+                                                <td>{{ session('minedTransaction')['nonce'] }}</td>
+                                            </tr>
+                                        @endif
                                     </tbody>
-                                </table> 
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-@stop
 </body>
 </html>
-
-
+@stop

@@ -18,16 +18,20 @@ use App\Http\Controllers\TransactionController;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
+// Route::get('/', function () {
+//     return view('home.index');
+// });
+
 Route::get('/', function () {
     return view('home.index');
-});
+})->name('home');
+
 // Route::get('/wallets', function () {
 //     return view('wallets.index');
 // });
 Route::get('/pending', function () {
     return view('pending.index');
 });
-
 
 
 Route::get('/wallets', [WalletController::class, 'index'])->name('wallets.index');

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Log;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -15,13 +16,10 @@ class TransactionController extends Controller
 
     public function create(Request $request)
     {
-        // Example logic for handling transaction creation
-        // Assuming transaction details are passed from a form
         $fromAddress = "df952bd220cecb037be12d59e7d86532b8b0b9166e1cb69bd4cb094dee2bb2c9";
-        $toAddress = $request->toAddress; // You would need to pass this from the form
+        $toAddress = $request->toAddress;
         $amount = "200";
 
-        // Sign the transaction
         $transactionData = $fromAddress . $toAddress . $amount;
         $signature = $this->signTransaction($transactionData);
 
@@ -34,7 +32,6 @@ class TransactionController extends Controller
             'signature' => $signature
         ];
 
-        // Add to pending transactions
         $pendingTransactions = Session::get('pendingTransactions', []);
         $pendingTransactions[] = $transaction;
         Session::put('pendingTransactions', $pendingTransactions);
@@ -43,53 +40,52 @@ class TransactionController extends Controller
     }
 
     public function mine(Request $request)
-    {
-        $transactionId = $request->input('transactionId');
-        $transactions = Session::get('pendingTransactions', []);
-        $transaction = collect($transactions)->firstWhere('id', $transactionId);
+{
+    Log::info("Mining transaction");
 
-        // Verify signature
-        $isValid = $this->verifySignature($transaction);
-        if (!$isValid) {
-            return back()->with('error', 'Transaction signature is not valid.');
-        }
+    $transactionId = $request->input('transactionId');
+    $transactions = Session::get('pendingTransactions', []);
+    $transaction = collect($transactions)->firstWhere('id', $transactionId);
 
-        // Simulate mining operation
-        if ($transaction) {
-            // Remove from pending transactions
-            $transactions = collect($transactions)->reject(function ($t) use ($transactionId) {
-                return $t['id'] === $transactionId;
-            })->toArray();
-
-            // Add to completed blocks (session for simplicity)
-            $completedBlocks = Session::get('completedBlocks', []);
-            $completedBlocks[] = $transaction;
-            Session::put('completedBlocks', $completedBlocks);
-            Session::put('pendingTransactions', $transactions);
-
-            return redirect('/')->with('success', 'Transaction mined successfully!');
-        }
-
-        return back()->with('error', 'Failed to mine the transaction.');
+    if (!$transaction) {
+        Log::error("No transaction found with ID", ['transactionId' => $transactionId]);
+        return back()->with('error', 'Transaction not found.');
     }
 
-    // Function to sign transaction using RSA
+    Log::info("Transaction found", ['id' => $transaction['id']]);
+
+    // Simulate hash and nonce for the transaction
+    $transaction['hash'] = hash('sha256', serialize($transaction));
+    $transaction['nonce'] = mt_rand();
+
+    // Update session or database as necessary
+    $completedBlocks = Session::get('completedBlocks', []);
+    $completedBlocks[] = $transaction;
+    Session::put('completedBlocks', $completedBlocks);
+
+    // Remove transaction from pending transactions
+    $transactions = array_filter($transactions, function ($t) use ($transactionId) {
+        return $t['id'] !== $transactionId;
+    });
+    Session::put('pendingTransactions', $transactions);
+
+    // Flash transaction data for one-time use in the view
+    Session::flash('minedTransaction', $transaction);
+
+    return redirect()->route('home')->with('success', 'Transaction mined successfully!');
+}
+
     private function signTransaction($data)
     {
-        // Use your private key to sign the data using openssl with RSA
-        $privateKey = '898ab45a1615c6a2c5382153d07b42dcb5c74b50ed39fb6f6421406d61bd50a4'; // Replace with your actual private key
-        $signature = '';
-        openssl_sign($data, $signature, $privateKey, OPENSSL_ALGO_SHA256);
-        return base64_encode($signature);
+        $privateKey = '89ab45a1615c6a2c5382153d07b42dcb5c74b50ed39fb6f6421406d61bd50a4';
+        return hash('sha256', $privateKey . $data);
     }
 
-    // Function to verify transaction signature using RSA
     private function verifySignature($transaction)
     {
-        // Use public key to verify the signature using openssl with RSA
-        $publicKey = 'df952bd220cecb037be12d59e7d86532b8b0b9166e1cb69bd4cb094dee2bb2c9'; // Replace with the public key corresponding to fromAddress
-        $signature = base64_decode($transaction['signature']);
+        $publicKey = 'df952bd220cecb037be12d59e7d86532b8b0b9166e1cb69bd4cb094dee2bb2c9';
         $data = $transaction['from'] . $transaction['to'] . $transaction['amount'];
-        return openssl_verify($data, $signature, $publicKey, OPENSSL_ALGO_SHA256) === 1;
+        $computedSignature = hash('sha256', $publicKey . $data);
+        return $transaction['signature'] === $computedSignature;
     }
 }
