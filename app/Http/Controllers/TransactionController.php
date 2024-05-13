@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Log;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -40,40 +40,42 @@ class TransactionController extends Controller
     }
 
     public function mine(Request $request)
-{
-    Log::info("Mining transaction");
+    {
+        Log::info("Mining transaction");
 
-    $transactionId = $request->input('transactionId');
-    $transactions = Session::get('pendingTransactions', []);
-    $transaction = collect($transactions)->firstWhere('id', $transactionId);
+        $transactionId = $request->input('transactionId');
+        $transactions = Session::get('pendingTransactions', []);
+        $transaction = collect($transactions)->firstWhere('id', $transactionId);
 
-    if (!$transaction) {
-        Log::error("No transaction found with ID", ['transactionId' => $transactionId]);
-        return back()->with('error', 'Transaction not found.');
+        if (!$transaction) {
+            Log::error("No transaction found with ID", ['transactionId' => $transactionId]);
+            return back()->with('error', 'Transaction not found.');
+        }
+
+        Log::info("Transaction found", ['id' => $transaction['id']]);
+
+        // Simulate hash and nonce for the transaction
+        $transaction['hash'] = hash('sha256', serialize($transaction));
+        $transaction['nonce'] = mt_rand();
+
+        // Update session or database as necessary
+        $completedBlocks = Session::get('completedBlocks', []);
+        $completedBlocks[] = $transaction;
+        Session::put('completedBlocks', $completedBlocks);
+
+        // Log the session data to debug
+        Log::debug('Session Data:', Session::all());
+
+        // Remove transaction from pending transactions
+        $transactions = array_filter($transactions, function ($t) use ($transactionId) {
+            return $t['id'] !== $transactionId;
+        });
+        Session::put('pendingTransactions', $transactions);
+
+        // Reflash and redirect with a flash message indicating the block was added
+        Session::reflash();
+        return redirect()->route('home')->with('success', 'Transaction mined successfully!')->with('status', 'block_added');
     }
-
-    Log::info("Transaction found", ['id' => $transaction['id']]);
-
-    // Simulate hash and nonce for the transaction
-    $transaction['hash'] = hash('sha256', serialize($transaction));
-    $transaction['nonce'] = mt_rand();
-
-    // Update session or database as necessary
-    $completedBlocks = Session::get('completedBlocks', []);
-    $completedBlocks[] = $transaction;
-    Session::put('completedBlocks', $completedBlocks);
-
-    // Remove transaction from pending transactions
-    $transactions = array_filter($transactions, function ($t) use ($transactionId) {
-        return $t['id'] !== $transactionId;
-    });
-    Session::put('pendingTransactions', $transactions);
-
-    // Flash transaction data for one-time use in the view
-    Session::flash('minedTransaction', $transaction);
-
-    return redirect()->route('home')->with('success', 'Transaction mined successfully!');
-}
 
     private function signTransaction($data)
     {

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\Block;
 use App\Models\Blockchain;
@@ -10,15 +10,20 @@ use Illuminate\Support\Facades\Session;
 
 class BlockController extends Controller
 {
-    public function index()
+        public function index()
     {
+        // Check session for flash message to confirm a new block was added
+        if (Session::has('status') && Session::get('status') == 'block_added') {
+            Log::debug('Block added, session refreshed.');
+        }
+    
         // Fetch blockchain from session or create a new one
         $blockchain = Session::get('blockchain', new Blockchain());
-
+    
         // Pass blockchain data to the view
         return view('home.index', ['blockchain' => $blockchain]);
     }
-
+    
     public function addBlock(Request $request)
     {
         // Fetch blockchain from session or create a new one

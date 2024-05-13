@@ -1,12 +1,9 @@
 <?php
-
-namespace App\Models;
-use App\Models\Transaction;
-
-use Illuminate\Support\Collection;
 namespace App\Models;
 
-class Blockchain {
+use Serializable;
+
+class Blockchain implements Serializable {
     public $chain;
     public $difficulty;
 
@@ -15,14 +12,14 @@ class Blockchain {
         $this->difficulty = 2;
     }
 
-    public function getLastBlock() {
-        return end($this->chain);
-    }
-
     public function addBlock(Block $block) {
         $block->previousHash = $this->getLastBlock()->hash;
         $block->mineBlock($this->difficulty);
         $this->chain[] = $block;
+    }
+
+    public function getLastBlock() {
+        return end($this->chain);
     }
 
     public function isChainValid() {
@@ -39,5 +36,19 @@ class Blockchain {
             }
         }
         return true;
+    }
+
+    public function serialize() {
+        return serialize([
+            $this->chain,
+            $this->difficulty
+        ]);
+    }
+
+    public function unserialize($data) {
+        list(
+            $this->chain,
+            $this->difficulty
+        ) = unserialize($data);
     }
 }
