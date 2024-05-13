@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\TransactionController;
-
+use App\Http\Controllers\MinedTransactionController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,3 +40,7 @@ Route::get('/transaction', [TransactionController::class, 'index'])->name('pendi
 Route::post('/transaction/mine', [TransactionController::class, 'mine'])->name('pending.mine');
 // Define the missing route for transaction creation
 Route::post('/transaction/create', [TransactionController::class, 'create'])->name('pending.create');
+Route::get('/transaction/mine', [TransactionController::class, 'index'])->name('home.index');
+
+Route::get('/mined_transactions', [MinedTransactionController::class, 'index'])->name('mined_transactions.index');
+Route::get('/mined_transactions/{id}', [MinedTransactionController::class, 'show'])->name('mined_transactions.show');

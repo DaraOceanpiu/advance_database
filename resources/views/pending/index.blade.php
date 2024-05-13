@@ -45,6 +45,7 @@
                     <table class="table">
                         <thead class="table-light">
                             <tr>
+                                <th>ID</th>
                                 <th>Timestamp</th>
                                 <th>From</th>
                                 <th>To</th>
@@ -56,11 +57,12 @@
                         <tbody>
                             @foreach($pendingTransactions as $transaction)
                                 <tr>
-                                    <td>{{ $transaction['timestamp'] }}</td>
-                                    <td>{{ $transaction['from'] }}</td>
-                                    <td>{{ $transaction['to'] }}</td>
-                                    <td>{{ $transaction['amount'] }}</td>
-                                    <td>{{ $transaction['signature'] }}</td>
+                                    <td>{{$transaction->id}}</td>
+                                    <td>{{ $transaction->created_at }}</td>
+                                    <td>{{ $transaction->from }}</td>
+                                    <td>{{ $transaction->to }}</td>
+                                    <td>{{ $transaction->amount }}</td>
+                                    <td>{{ $transaction->signature }}</td>
                                     <td>
                                         <form action="{{ route('pending.mine') }}" method="POST">
                                             @csrf

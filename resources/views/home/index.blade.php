@@ -39,6 +39,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                     
                                         @if(session('minedTransaction'))
                                             <tr>
                                                 <td>{{ session('minedTransaction')['timestamp'] }}</td>
