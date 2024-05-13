@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\TransactionController;
-
+use App\Http\Controllers\BlockController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,3 +40,10 @@ Route::get('/transaction', [TransactionController::class, 'index'])->name('pendi
 Route::post('/transaction/mine', [TransactionController::class, 'mine'])->name('pending.mine');
 // Define the missing route for transaction creation
 Route::post('/transaction/create', [TransactionController::class, 'create'])->name('pending.create');
+
+
+// Blockchain display and operations
+Route::get('/', [BlockController::class, 'index'])->name('home');
+Route::post('/block/add', [BlockController::class, 'addBlock'])->name('block.add');
+Route::get('/blockchain/verify', [BlockController::class, 'verifyBlockchain'])->name('blockchain.verify');
+Route::get('/verifyBlockchain', [BlockController::class, 'verifyBlockchain'])->name('verifyBlockchain');
