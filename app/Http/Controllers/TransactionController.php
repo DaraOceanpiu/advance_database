@@ -59,7 +59,7 @@ class TransactionController extends Controller
         $timestamp = now(); // Get the current timestamp
 
         // Redirect back to the homepage with transactions data and timestamp
-        return redirect()->route('home.index')->with('message', 'Transaction mined successfully');
+        return redirect()->route('home')->with('message', 'Transaction mined successfully');
     }
     public function minedTransactions()
     {
