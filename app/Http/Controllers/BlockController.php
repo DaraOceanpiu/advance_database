@@ -21,7 +21,7 @@ class BlockController extends Controller
         $blockchain = Session::get('blockchain', new Blockchain());
     
         // Pass blockchain data to the view
-        return view('home', ['blockchain' => $blockchain]);
+        return view('home.index', ['blockchain' => $blockchain]);
     }
     
     public function addBlock(Request $request)
@@ -50,6 +50,6 @@ class BlockController extends Controller
     $isValid = $blockchain->isChainValid();
 
     // Return validation result
-    return redirect()->route('home.index')->with('message', $isValid ? 'Blockchain is valid' : 'Blockchain is not valid');
+    return redirect()->route('home')->with('message', $isValid ? 'Blockchain is valid' : 'Blockchain is not valid');
 }
 }

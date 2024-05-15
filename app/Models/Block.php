@@ -2,28 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\Log; // Correct namespace for Log
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 
-class Block
+class Block extends Model
 {
-    public $timestamp;
-    public $transactions;
-    public $previousHash;
-    public $hash;
-    public $nonce;
+
+    use HasFactory;
+    protected $fillable = ['timestamp', 'transactions', 'previousHash', 'hash', 'nounce'];
 
     public function __construct($transactions, $previousHash = '')
-{
-    $this->timestamp = now()->toDateTimeString();
-    $this->transactions = $transactions;
-    $this->previousHash = $previousHash;
-    $this->nonce = mt_rand();  // Initialize nonce to a random number
-    $this->hash = $this->calculateHash();
-}
+    {
+        $this->timestamp = now()->toDateTimeString();
+        $this->transactions = $transactions;
+        $this->previousHash = $previousHash;
+        $this->nonce = mt_rand();  // Initialize nonce to a random number
+        $this->hash = $this->calculateHash();
+    }
 
 
-    public function calculateHash() {
+    public function calculateHash()
+    {
         return hash('sha256', $this->previousHash . $this->timestamp . json_encode($this->transactions) . $this->nonce);
     }
 
@@ -34,16 +35,17 @@ class Block
             $this->nonce = 0;  // Reset nonce if the current hash does not meet the target
             $this->hash = $this->calculateHash();
         }
-    
+
         while (substr($this->hash, 0, $difficulty) !== $target) {
             $this->nonce++;
             $this->hash = $this->calculateHash();
         }
     }
-    
-    
 
-    public function serialize() {
+
+
+    public function serialize()
+    {
         return serialize([
             $this->timestamp,
             $this->transactions,
@@ -53,7 +55,8 @@ class Block
         ]);
     }
 
-    public function unserialize($data) {
+    public function unserialize($data)
+    {
         list(
             $this->timestamp,
             $this->transactions,
